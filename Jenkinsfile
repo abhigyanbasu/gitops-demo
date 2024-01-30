@@ -1,11 +1,13 @@
 pipeline {
     agent any
     environment {
+        RELEASE = "1.0.0"
         DOCKERHUB_USERNAME = "abhigyanbasu"
         APP_NAME = "gitops-demo-app"
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}" + "/" + "${APP_NAME}"
         REGISTRY_CREDS = 'dockerhub'
+        JENKINS_API_TOKEN = credentials("JENKINS_API_TOKEN")
         }
     stages {
         stage('Cleanup Workspace'){
@@ -33,7 +35,7 @@ pipeline {
             steps {
                 script{
                     docker.withRegistry('', REGISTRY_CREDS ){
-                        docker_image.push("${BUILD_NUMBER}")
+                        docker_image.push("${IMAGE_TAG}")
                         docker_image.push('latest')
                     }
                 }
@@ -42,12 +44,14 @@ pipeline {
         stage('Delete Docker Images'){
             steps {
                 sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
-                sh "docker rmi ${IMAGE_NAME}:latest"
+              //  sh "docker rmi ${IMAGE_NAME}:latest"
             }
         }
         stage('Trigger config change pipeline'){
             steps {
-                sh "curl -v -k --user admin:11cd38cb233da32a8c630c63a2ca9df42e -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'http://52.38.89.154:8080/job/gitops-deploy/buildWithParameters?token=gitops-config1'"
+                //sh "curl -v -k --user admin:11cd38cb233da32a8c630c63a2ca9df42e -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'http://52.38.89.154:8080/job/gitops-deploy/buildWithParameters?token=gitops-config1'"
+               sh "curl -v -k --user admin:${JENKINS_API_TOKEN} -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'https://jenkins.abhgyan.pics/job/gitops-deployment-pipeline/buildWithParameters?token=gitops-token'"
+                
                // build job: 'gitops-deploy', parameters: [string(name: 'IMAGE_NAME', value:"${IMAGE_NAME}")]
             }
         }
