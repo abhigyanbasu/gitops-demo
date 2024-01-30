@@ -50,7 +50,7 @@ pipeline {
         stage('Trigger config change pipeline'){
             steps {
                 //sh "curl -v -k --user admin:11cd38cb233da32a8c630c63a2ca9df42e -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'http://52.38.89.154:8080/job/gitops-deploy/buildWithParameters?token=gitops-config1'"
-               sh "curl -v -k --user admin:${JENKINS_API_TOKEN} -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'https://jenkins.abhgyan.pics/job/gitops-deployment-pipeline/buildWithParameters?token=gitops-token'"
+               sh "curl -v -k --user admin:${JENKINS_API_TOKEN} -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'https://jenkins.abhgyan.pics/job/old-gitops-deploy-pipeline/buildWithParameters?token=gitops-token'"
                 
                // build job: 'gitops-deploy', parameters: [string(name: 'IMAGE_NAME', value:"${IMAGE_NAME}")]
             }
